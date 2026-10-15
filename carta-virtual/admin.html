@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración Profesional - Buffet Fraga Libertad Web</title>
+    <!-- Tailwind CSS desde CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darker: '#000000',
+                        panel: '#0a0a0a',
+                        card: '#141414'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col font-sans selection:bg-white selection:text-black">
+
+    <!-- ========================================== -->
+    <!-- BARRA DE NAVEGACIÓN PRINCIPAL              -->
+    <!-- ========================================== -->
+    <header class="bg-black border-b border-neutral-800 sticky top-0 z-40 shadow-xl backdrop-blur-md bg-opacity-95">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-black p-2.5 rounded-2xl font-black text-xl shadow-lg shadow-white/10">
+                    🥪
+                </div>
+                <div>
+                    <h1 class="text-xl font-black text-white tracking-wider">BUFFET FRAGA LIBERTAD ADMIN</h1>
+                    <p class="text-xs text-neutral-400 font-medium">Gestión Centralizada de Menú, Stock y Modificadores</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 border border-neutral-700">
+                    <span>👁️</span> Ver Carta Pública
+                </a>
+                <button id="logoutBtn" class="bg-neutral-900 hover:bg-neutral-800 text-red-400 border border-neutral-800 text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2">
+                    <span>🚪</span> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- LAYOUT PRINCIPAL DE GESTIÓN DE PRODUCTOS  -->
+    <!-- ========================================== -->
+    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8 flex-grow w-full my-4">
+        
+        <!-- COLUMNA IZQUIERDA: FORMULARIO DE ALTA -->
+        <section class="bg-neutral-950 p-6 rounded-3xl border border-neutral-800 shadow-2xl h-fit">
+            <div class="flex items-center space-x-2.5 mb-6 border-b border-neutral-800 pb-4">
+                <div class="bg-neutral-900 border border-neutral-700 p-2 rounded-xl text-white font-bold">➕</div>
+                <div>
+                    <h2 class="text-base font-bold text-white">Nuevo Producto</h2>
+                    <p class="text-[11px] text-neutral-400">Configurá el producto, su precio y stock inicial</p>
+                </div>
+            </div>
+
+            <form id="productForm" class="space-y-4">
+                <!-- Nombre del Producto -->
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5 text-neutral-300">Nombre del Producto *</label>
+                    <input type="text" id="prodNombre" required 
+                           class="w-full px-4 py-3 bg-neutral-900 rounded-xl text-sm border border-neutral-800 focus:ring-2 focus:ring-white focus:outline-none text-white placeholder-neutral-500 transition-all" 
+                           placeholder="Ej: Sándwich de Milanesa Completo">
+                </div>
+
+                <!-- Precio Base y Stock -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5 text-neutral-300">Precio en ARS ($) *</label>
+                        <input type="number" id="prodPrecio" required step="0.01" 
+                               class="w-full px-4 py-3 bg-neutral-900 rounded-xl text-sm border border-neutral-800 focus:ring-2 focus:ring-white focus:outline-none text-white placeholder-neutral-500 transition-all" 
+                               placeholder="Ej: 4500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5 text-neutral-300">Stock Inicial *</label>
+                        <input type="number" id="prodStock" required min="0" value="15" 
+                               class="w-full px-4 py-3 bg-neutral-900 rounded-xl text-sm border border-neutral-800 focus:ring-2 focus:ring-white focus:outline-none text-white placeholder-neutral-500 transition-all">
+                    </div>
+                </div>
+
+                <!-- Imagen del Plato -->
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5 text-neutral-300">Imagen del Producto (Archivo Local)</label>
+                    <input type="file" id="prodFotoFile" accept="image/*" 
+                           class="w-full px-3 py-2.5 bg-neutral-900 rounded-xl text-xs border border-neutral-800 text-neutral-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-white file:text-black hover:file:bg-neutral-200 transition-all cursor-pointer">
+                    <p class="text-[10px] text-neutral-500 mt-1">Seleccioná una imagen guardada en tu computadora.</p>
+                </div>
+
+                <!-- Descripción -->
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5 text-neutral-300">Descripción detallada</label>
+                    <textarea id="prodDesc" rows="3" 
+                              class="w-full px-4 py-3 bg-neutral-900 rounded-xl text-sm border border-neutral-800 focus:ring-2 focus:ring-white focus:outline-none text-white placeholder-neutral-500 resize-none transition-all" 
+                              placeholder="Pan francés, milanesa, lechuga, tomate y mayonesa..."></textarea>
+                </div>
+
+                <!-- GRUPO 1: OPCIONES / PANES -->
+                <div class="border border-neutral-800 bg-neutral-900/40 p-4 rounded-2xl space-y-3">
+                    <div class="flex items-center space-x-2 border-b border-neutral-800 pb-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-white"></span>
+                        <span class="text-xs font-bold text-white">Grupo 1 - Panes e Ingredientes (Múltiple)</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-neutral-400 mb-1">Opciones (Separadas por coma):</label>
+                        <input type="text" id="prodPanes" 
+                               class="w-full px-3 py-2 bg-neutral-900 rounded-xl text-xs border border-neutral-800 focus:ring-1 focus:ring-white focus:outline-none text-white placeholder-neutral-600" 
+                               placeholder="Ej: pan francés, pan de molde, sin lechuga">
+                        <p class="text-[10px] text-neutral-500 mt-0.5">Permite al cliente marcar las opciones deseadas.</p>
+                    </div>
+                </div>
+
+                <!-- GRUPO 2: GUARNICIONES -->
+                <div class="border border-neutral-800 bg-neutral-900/40 p-4 rounded-2xl space-y-3">
+                    <div class="flex items-center space-x-2 border-b border-neutral-800 pb-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-neutral-400"></span>
+                        <span class="text-xs font-bold text-white">Grupo 2 - Guarniciones (Múltiple)</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-neutral-400 mb-1">Opciones de Guarnición (Separadas por coma):</label>
+                        <input type="text" id="prodGuarnicion" 
+                               class="w-full px-3 py-2 bg-neutral-900 rounded-xl text-xs border border-neutral-800 focus:ring-1 focus:ring-white focus:outline-none text-white placeholder-neutral-600" 
+                               placeholder="Ej: papas fritas, ensalada rusa">
+                        <p class="text-[10px] text-neutral-500 mt-0.5">Opciones de guarnición elegibles libremente.</p>
+                    </div>
+                </div>
+
+                <!-- GRUPO 3: ADICIONALES CON PRECIO EXTRA -->
+                <div class="border border-neutral-800 bg-neutral-900/40 p-4 rounded-2xl space-y-3">
+                    <div class="flex items-center space-x-2 border-b border-neutral-800 pb-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-neutral-500"></span>
+                        <span class="text-xs font-bold text-white">Modificadores OPCIONALES (Con precio)</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-medium text-neutral-400 mb-1">Agregados / Quites (Separados por coma):</label>
+                        <input type="text" id="prodOpcionales" 
+                               class="w-full px-3 py-2 bg-neutral-900 rounded-xl text-xs border border-neutral-800 focus:ring-1 focus:ring-white focus:outline-none text-white placeholder-neutral-600" 
+                               placeholder="Ej: doble queso + 500, huevo frito + 400">
+                        <p class="text-[10px] text-neutral-400 mt-1">💡 Usá <b class="text-white">+</b> o <b class="text-white">:</b> para sumar costo extra.</p>
+                    </div>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-white hover:bg-neutral-200 font-bold py-3.5 rounded-xl transition-all text-sm shadow-xl text-black mt-2">
+                    Publicar Producto en Carta
+                </button>
+            </form>
+        </section>
+
+        <!-- COLUMNA DERECHA: TABLA DE INVENTARIO -->
+        <section class="lg:col-span-2 bg-neutral-950 p-6 rounded-3xl border border-neutral-800 shadow-2xl flex flex-col">
+            <div class="flex justify-between items-center mb-6 border-b border-neutral-800 pb-4">
+                <div class="flex items-center space-x-2.5">
+                    <div class="bg-neutral-900 border border-neutral-700 p-2 rounded-xl text-white font-bold">📋</div>
+                    <div>
+                        <h2 class="text-base font-bold text-white">Inventario y Control de Stock</h2>
+                        <p class="text-[11px] text-neutral-400">Administración general de la base de datos en Supabase</p>
+                    </div>
+                </div>
+                <span class="text-xs bg-neutral-900 text-white px-3.5 py-1.5 rounded-xl border border-neutral-800 font-semibold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> Sistema en Línea
+                </span>
+            </div>
+
+            <div class="overflow-x-auto flex-grow rounded-2xl border border-neutral-800">
+                <table class="w-full text-left text-sm text-neutral-300">
+                    <thead class="bg-neutral-900 text-xs uppercase text-neutral-400 border-b border-neutral-800">
+                        <tr>
+                            <th class="px-5 py-3.5 font-bold">Imagen</th>
+                            <th class="px-5 py-3.5 font-bold">Detalles y Modificadores</th>
+                            <th class="px-5 py-3.5 font-bold">Precio</th>
+                            <th class="px-5 py-3.5 font-bold text-center">Stock</th>
+                            <th class="px-5 py-3.5 text-center font-bold">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productosTableBody" class="divide-y divide-neutral-900 bg-black/50">
+                        <!-- Renderizado dinámicamente desde admin.js -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- MODAL FLOTANTE DE EDICIÓN AVANZADA         -->
+    <!-- ========================================== -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-all">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-3xl shadow-2xl w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b border-neutral-800 pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Editar Producto y Controlar Stock</h3>
+                    <p class="text-xs text-neutral-400">Actualizá precios, stock disponible o grupos de opciones</p>
+                </div>
+                <button id="closeModalBtn" class="bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white w-8 h-8 rounded-xl font-bold flex items-center justify-center transition-all">&times;</button>
+            </div>
+
+            <form id="editForm" class="space-y-4">
+                <input type="hidden" id="editId">
+                <input type="hidden" id="editFotoActual">
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1 text-neutral-300">Nombre del Producto *</label>
+                    <input type="text" id="editNombre" required class="w-full px-4 py-2.5 bg-neutral-900 rounded-xl text-sm border border-neutral-800 text-white focus:ring-2 focus:ring-white focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-neutral-300">Precio Base ($) *</label>
+                        <input type="number" id="editPrecio" required step="0.01" class="w-full px-4 py-2.5 bg-neutral-900 rounded-xl text-sm border border-neutral-800 text-white focus:ring-2 focus:ring-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold mb-1 text-neutral-300">Stock Disponible *</label>
+                        <input type="number" id="editStock" required min="0" class="w-full px-4 py-2.5 bg-neutral-900 rounded-xl text-sm border border-neutral-700 bg-neutral-900/50 text-white font-bold focus:ring-2 focus:ring-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1 text-neutral-300">Nueva Imagen (Opcional)</label>
+                    <input type="file" id="editFotoFile" accept="image/*" class="w-full px-3 py-2 bg-neutral-900 rounded-xl text-xs border border-neutral-800 text-neutral-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-white file:text-black hover:file:bg-neutral-200 transition-all cursor-pointer">
+                    <p class="text-[10px] text-neutral-500 mt-1">Si no seleccionás nada, se conserva la foto actual.</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold mb-1 text-neutral-300">Descripción</label>
+                    <textarea id="editDesc" rows="2" class="w-full px-4 py-2.5 bg-neutral-900 rounded-xl text-sm border border-neutral-800 text-white resize-none focus:ring-2 focus:ring-white focus:outline-none"></textarea>
+                </div>
+
+                <!-- Grupo 1 Modal -->
+                <div class="border border-neutral-800 bg-neutral-900/40 p-3 rounded-2xl space-y-2">
+                    <span class="text-xs font-bold text-white block">Grupo 1 (Panes / Ingredientes Múltiples):</span>
+                    <input type="text" id="editPanes" class="w-full px-3 py-2 bg-neutral-900 rounded-xl text-xs border border-neutral-800 text-white">
+                </div>
+
+                <!-- Grupo 2 Modal -->
+                <div class="border border-neutral-800 bg-neutral-900/40 p-3 rounded-2xl space-y-2">
+                    <span class="text-xs font-bold text-white block">Grupo 2 (Guarniciones Múltiples):</span>
+                    <input type="text" id="editGuarnicion" class="w-full px-3 py-2 bg-neutral-900 rounded-xl text-xs border border-neutral-800 text-white">
+                </div>
+
+                <!-- Opciones Opcionales Modal -->
+                <div class="border border-neutral-800 bg-neutral-900/40 p-3 rounded-2xl space-y-2">
+                    <span class="text-xs font-bold text-white block">Modificadores Opcionales (Con Precio Extra):</span>
+                    <input type="text" id="editOpcionales" class="w-full px-3 py-2 bg-neutral-900 rounded-xl text-xs border border-neutral-800 text-white">
+                </div>
+
+                <div class="flex space-x-3 pt-3">
+                    <button type="submit" class="w-full bg-white hover:bg-neutral-200 font-bold py-3 rounded-xl transition-all text-sm text-black shadow-lg">
+                        Guardar Cambios
+                    </button>
+                    <button type="button" id="cancelEditBtn" class="w-1/3 bg-neutral-900 hover:bg-neutral-800 font-bold py-3 rounded-xl transition-all text-sm border border-neutral-800 text-neutral-300">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="bg-black border-t border-neutral-800 py-4 text-center text-xs text-neutral-500 mt-auto">
+        Buffet Fraga Libertad Web &copy; 2026 - Módulo de Gestión de Carta e Inventario
+    </footer>
+
+    <!-- SCRIPT PRINCIPAL DE ADMINISTRACIÓN -->
+    <script type="module" src="./src/admin.js"></script>
+</body>
+</html>

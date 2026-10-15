@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Buffet Fraga Libertad Web</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white flex items-center justify-center h-screen font-sans selection:bg-white selection:text-black">
+
+    <div class="bg-neutral-950 p-8 rounded-3xl shadow-2xl w-96 border border-neutral-800">
+        <div class="text-center mb-6">
+            <div class="bg-white p-2 rounded-2xl w-20 h-20 flex items-center justify-center mx-auto mb-3 shadow-xl overflow-hidden">
+                <img src="./logo.jpeg" alt="Logo Buffet Libertad" class="w-full h-full object-contain">
+            </div>
+            <h1 class="text-xl font-black text-white tracking-wider">CREAR CUENTA</h1>
+            <p class="text-xs text-neutral-400 mt-1">Elegí tu tipo de cuenta y registrate</p>
+        </div>
+        
+        <form id="registerForm" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold mb-1 text-neutral-300">Correo Electrónico</label>
+                <input type="email" id="regEmail" required class="w-full px-4 py-2.5 bg-neutral-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-white border border-neutral-800 text-white placeholder-neutral-500" placeholder="tucorreo@email.com">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold mb-1 text-neutral-300">Contraseña</label>
+                <input type="password" id="regPassword" required class="w-full px-4 py-2.5 bg-neutral-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-white border border-neutral-800 text-white placeholder-neutral-500" placeholder="••••••••">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold mb-1 text-neutral-300">Tipo de Cuenta</label>
+                <select id="regRol" class="w-full px-4 py-2.5 bg-neutral-900 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-white border border-neutral-800 text-white">
+                    <option value="cliente">Usuario Común (Ver Menú y Comprar)</option>
+                    <option value="admin">Administrador (Gestionar Productos)</option>
+                </select>
+            </div>
+            <button type="submit" class="w-full bg-white hover:bg-neutral-200 text-black font-bold py-3 rounded-xl transition text-sm shadow-lg">
+                Registrarse
+            </button>
+        </form>
+
+        <p class="text-xs text-center text-neutral-400 mt-5">
+            ¿Ya tenés cuenta? <a href="login.html" class="text-white underline font-bold hover:text-neutral-300">Iniciá sesión</a>
+        </p>
+    </div>
+
+    <script type="module" src="./src/auth.js"></script>
+</body>
+</html>

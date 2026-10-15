@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta Oficial - Buffet Fraga Libertad</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white min-h-screen font-sans antialiased selection:bg-white selection:text-black">
+
+    <!-- ================= BARRA SUPERIOR DE ADMINISTRADOR ================= -->
+    <div id="adminTopBar" class="hidden bg-neutral-900 border-b border-neutral-800 px-6 py-2.5 flex justify-between items-center sticky top-0 z-50 shadow-lg">
+        <div class="flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span class="text-xs font-bold text-amber-300">Modo Administrador Activo (Vista de Cliente)</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <a href="admin.html" class="bg-white hover:bg-neutral-200 text-black px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-md cursor-pointer">
+                ⚙️ Volver al Panel de Gestión
+            </a>
+            <button id="logoutBtn" class="bg-neutral-950 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer">
+                Cerrar Sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= HEADER / NAVEGACIÓN PRINCIPAL ================= -->
+    <header class="border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-1 rounded-xl w-9 h-9 flex items-center justify-center overflow-hidden">
+                    <img src="./logo.jpeg" alt="Logo" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-sm font-black tracking-wider">BUFFET FRAGA LIBERTAD</h1>
+                    <p id="saludoUsuario" class="text-[10px] text-neutral-400">Cargando perfil...</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Botón de Abrir Carrito -->
+                <button onclick="toggleCarrito()" class="relative bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-800 px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer">
+                    🛒 Carrito <span id="carritoBadge" class="bg-white text-black px-1.5 py-0.5 rounded-full text-[10px] font-black">0</span>
+                </button>
+                <a href="login.html" id="authLinkBtn" class="bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 px-4 py-2 rounded-xl text-xs font-bold transition">
+                    Iniciar Sesión
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= CONTENIDO DE LA CARTA ================= -->
+    <main class="max-w-7xl mx-auto px-6 py-10 space-y-8">
+        <div class="text-center space-y-2">
+            <h2 class="text-3xl font-black tracking-tight">Nuestra Carta</h2>
+            <p class="text-xs text-neutral-400">Elegí tus opciones favoritas, armá tu pedido y controlá el stock disponible en tiempo real.</p>
+        </div>
+
+        <!-- Contenedor de Productos -->
+        <div id="productosContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Renderizado dinámico desde Supabase -->
+        </div>
+    </main>
+
+    <!-- ================= MODAL DEL CARRITO DE COMPRAS ================= -->
+    <div id="carritoModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex justify-end">
+        <div class="bg-neutral-950 border-l border-neutral-800 w-full max-w-md h-full p-6 flex flex-col justify-between shadow-2xl overflow-y-auto">
+            <div class="space-y-6">
+                <div class="flex justify-between items-center border-b border-neutral-800 pb-4">
+                    <h3 class="text-lg font-bold">Tu Pedido Actual</h3>
+                    <button onclick="toggleCarrito()" class="text-neutral-400 hover:text-white text-xl font-bold cursor-pointer">&times;</button>
+                </div>
+
+                <!-- Lista de items en el carrito -->
+                <div id="carritoItemsContainer" class="space-y-4">
+                    <p class="text-xs text-neutral-500 text-center py-8">Tu carrito está vacío.</p>
+                </div>
+            </div>
+
+            <!-- Resumen y Botón de Pedido por WhatsApp -->
+            <div class="border-t border-neutral-800 pt-6 space-y-4">
+                <div class="flex justify-between items-center text-base font-bold">
+                    <span>Total a Pagar:</span>
+                    <span id="carritoTotal" class="text-emerald-400">$0.00</span>
+                </div>
+
+                <div class="space-y-2">
+                    <button id="btnEnviarPedido" onclick="enviarPedidoWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl text-xs font-black tracking-wider transition shadow-lg cursor-pointer flex items-center justify-center gap-2">
+                        <span>📱 Confirmar Pedido y Datos de Pago por WhatsApp</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= SCRIPT PRINCIPAL ================= -->
+    <script type="module">
+        import { db } from './supabase.js';
+
+        // =============================================================
+        // 📌 CONFIGURACIÓN DE CONTACTO Y MERCADO PAGO
+        // =============================================================
+        const NUMERO_WHATSAPP_BUFFET = "5491126272612"; // Tu número de WhatsApp sin +
+        const ALIAS_MERCADO_PAGO = "buffetfragata";     // Tu Alias de Mercado Pago
+        const TITULAR_CUENTA = "Jesica Romina Pistolesi";    // Nombre del titular de la cuenta
+        // =============================================================
+
+        let carrito = [];
+        let usuarioActual = null;
+        let productosCache = [];
+
+        const usuarioLogueadoStr = localStorage.getItem("usuarioLogueado");
+        const saludoUsuario = document.getElementById('saludoUsuario');
+        const authLinkBtn = document.getElementById('authLinkBtn');
+        const adminTopBar = document.getElementById('adminTopBar');
+
+        if (usuarioLogueadoStr) {
+            try {
+                usuarioActual = JSON.parse(usuarioLogueadoStr);
+                saludoUsuario.textContent = `Hola, ${usuarioActual.nombre} (${usuarioActual.rol.toUpperCase()})`;
+                authLinkBtn.textContent = "Cambiar Cuenta";
+                authLinkBtn.href = "login.html";
+
+                if (usuarioActual.rol === 'admin') {
+                    adminTopBar.classList.remove('hidden');
+                }
+            } catch (e) {
+                console.error("Error al leer sesión:", e);
+            }
+        } else {
+            saludoUsuario.textContent = "Visitante (Iniciá sesión para identificar tu pedido)";
+            authLinkBtn.textContent = "Iniciar Sesión";
+            authLinkBtn.href = "login.html";
+        }
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                localStorage.removeItem("usuarioLogueado");
+                window.location.reload();
+            });
+        }
+
+        // 2. CARGAR CARTA DESDE SUPABASE Y MOSTRAR STOCK
+        const productosContainer = document.getElementById('productosContainer');
+
+        async function cargarCarta() {
+            try {
+                const { data: productos, error } = await db.from('productos').select('*').order('id', { ascending: false });
+
+                if (error) {
+                    console.error("Error al cargar productos:", error);
+                    return;
+                }
+
+                productosCache = productos || [];
+                productosContainer.innerHTML = '';
+
+                if (!productos || productos.length === 0) {
+                    productosContainer.innerHTML = `<p class="col-span-full text-center text-neutral-500 py-12">No hay productos disponibles.</p>`;
+                    return;
+                }
+
+                productos.forEach(prod => {
+                    let opcionesObj = { opcionales: [], dinamicos: [] };
+                    try {
+                        if (prod.opciones) {
+                            opcionesObj = typeof prod.opciones === 'string' ? JSON.parse(prod.opciones) : prod.opciones;
+                        }
+                    } catch (e) {
+                        opcionesObj.opcionales = [prod.opciones];
+                    }
+
+                    const fotoUrl = prod.foto && prod.foto.trim() !== '' ? prod.foto : 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80';
+                    const precioBase = Number(prod.precio);
+                    const stockActual = prod.stock !== undefined && prod.stock !== null ? Number(prod.stock) : 0;
+                    const stockAgotado = stockActual <= 0;
+
+                    const card = document.createElement('div');
+                    card.className = "bg-neutral-950 border border-neutral-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col justify-between";
+
+                    // Modificadores dinámicos
+                    let htmlDinamicos = '';
+                    if (opcionesObj.dinamicos && opcionesObj.dinamicos.length > 0) {
+                        htmlDinamicos = opcionesObj.dinamicos.map((grupo, idx) => {
+                            const inputType = grupo.tipo === 'unico' ? 'radio' : 'checkbox';
+                            const inputsHtml = grupo.opciones.map((opc, optIdx) => `
+                                <label class="flex items-center space-x-2 text-xs text-neutral-300 cursor-pointer">
+                                    <input type="${inputType}" name="prod_${prod.id}_grupo_${idx}" value="${opc}" ${optIdx === 0 && grupo.tipo === 'unico' ? 'checked' : ''} class="accent-white">
+                                    <span>${opc}</span>
+                                </label>
+                            `).join('');
+
+                            return `
+                                <div class="space-y-1.5 bg-neutral-900/60 p-3 rounded-xl border border-neutral-800/80">
+                                    <span class="block text-[11px] font-bold text-neutral-200">${grupo.titulo} <span class="text-[9px] text-neutral-400">(${grupo.tipo === 'unico' ? 'Único' : 'Múltiple'})</span></span>
+                                    <div class="space-y-1" data-grupo-id="prod_${prod.id}_grupo_${idx}" data-tipo="${grupo.tipo}">
+                                        ${inputsHtml}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+
+                    // Modificadores opcionales con precio extra
+                    let htmlOpcionales = '';
+                    if (opcionesObj.opcionales && opcionesObj.opcionales.length > 0) {
+                        const checksOpc = opcionesObj.opcionales.map((opc, idx) => {
+                            const nombreOpc = typeof opc === 'object' ? opc.nombre : opc;
+                            const precioOpc = typeof opc === 'object' ? Number(opc.precioExtra || 0) : 0;
+                            return `
+                                <label class="flex items-center justify-between text-xs text-neutral-300 cursor-pointer bg-black/40 px-2.5 py-1.5 rounded-lg border border-neutral-800">
+                                    <div class="flex items-center space-x-2">
+                                        <input type="checkbox" value="${nombreOpc}" data-precio="${precioOpc}" class="opcional-extra-item accent-white" id="opc_${prod.id}_${idx}">
+                                        <span>${nombreOpc}</span>
+                                    </div>
+                                    <span class="text-[10px] text-emerald-400 font-semibold">${precioOpc > 0 ? `+$${precioOpc}` : 'Incluido'}</span>
+                                </label>
+                            `;
+                        }).join('');
+
+                        htmlOpcionales = `
+                            <div class="space-y-1.5 bg-neutral-900/40 p-3 rounded-xl border border-neutral-800">
+                                <span class="block text-[11px] font-bold text-neutral-200">➕ Adicionales Opcionales:</span>
+                                <div class="space-y-1" id="opcionalesContainer_${prod.id}">
+                                    ${checksOpc}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Badge de Stock
+                    const badgeStock = stockAgotado 
+                        ? `<span class="bg-red-600/90 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg border border-red-500/50">🔴 AGOTADO</span>`
+                        : `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-lg text-[10px] font-bold">🟢 Stock: ${stockActual} un.</span>`;
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="h-48 overflow-hidden relative">
+                                <img src="${fotoUrl}" alt="${prod.nombre}" class="w-full h-full object-cover">
+                                <div class="absolute top-3 right-3">${badgeStock}</div>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-base font-bold text-white">${prod.nombre}</h3>
+                                    <span class="text-sm font-black text-emerald-400">$${precioBase.toLocaleString('es-AR')}</span>
+                                </div>
+                                <p class="text-xs text-neutral-400">${prod.descripcion || 'Sin descripción'}</p>
+                                
+                                <div class="space-y-3 pt-2">
+                                    ${htmlDinamicos}
+                                    ${htmlOpcionales}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-6 pt-0">
+                            <button onclick="agregarAlCarrito(${prod.id}, '${encodeURIComponent(prod.nombre)}', ${precioBase}, ${stockActual}, '${prod.opciones ? encodeURIComponent(JSON.stringify(opcionesObj)) : ''}')" 
+                                    class="w-full ${stockAgotado ? 'bg-neutral-800 text-neutral-500 cursor-not-allowed' : 'bg-white hover:bg-neutral-200 text-black cursor-pointer'} py-3.5 rounded-2xl text-xs font-black tracking-wider transition shadow-lg">
+                                ${stockAgotado ? 'Sin Stock Disponible' : 'Agregar al Carrito 🛒'}
+                            </button>
+                        </div>
+                    `;
+                    productosContainer.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error("Error al cargar carta:", err);
+            }
+        }
+
+        // 3. CARRITO LOGIC
+        window.toggleCarrito = function() {
+            document.getElementById('carritoModal').classList.toggle('hidden');
+        };
+
+        window.agregarAlCarrito = function(id, nombreEnc, precioBase, stockMax, opcionesJsonEnc) {
+            // Contar cuántos de este mismo producto ya hay en el carrito
+            const cantidadEnCarrito = carrito.filter(item => item.id === id).length;
+
+            if (cantidadEnCarrito >= stockMax) {
+                alert(`⚠️ ¡No podés agregar más unidades! Solo quedan ${stockMax} unidades de este producto en stock.`);
+                return;
+            }
+
+            const nombre = decodeURIComponent(nombreEnc);
+            let opcionesObj = { dinamicos: [], opcionales: [] };
+            
+            try {
+                if (opcionesJsonEnc) {
+                    opcionesObj = JSON.parse(decodeURIComponent(opcionesJsonEnc));
+                }
+            } catch(e) {}
+
+            let seleccionDinamica = [];
+            if (opcionesObj.dinamicos) {
+                opcionesObj.dinamicos.forEach((grupo, idx) => {
+                    const contenedorGrupo = document.querySelector(`[data-grupo-id="prod_${id}_grupo_${idx}"]`);
+                    if (contenedorGrupo) {
+                        const tipo = contenedorGrupo.getAttribute('data-tipo');
+                        if (tipo === 'unico') {
+                            const seleccionado = contenedorGrupo.querySelector('input[type="radio"]:checked');
+                            if (seleccionado) {
+                                seleccionDinamica.push({ titulo: grupo.titulo, valor: seleccionado.value });
+                            }
+                        } else {
+                            const seleccionados = contenedorGrupo.querySelectorAll('input[type="checkbox"]:checked');
+                            const valores = Array.from(seleccionados).map(el => el.value);
+                            if (valores.length > 0) {
+                                seleccionDinamica.push({ titulo: grupo.titulo, valor: valores.join(', ') });
+                            }
+                        }
+                    }
+                });
+            }
+
+            let adicionalesSeleccionados = [];
+            let costoAdicionales = 0;
+            const containerOpc = document.getElementById(`opcionalesContainer_${id}`);
+            if (containerOpc) {
+                const checks = containerOpc.querySelectorAll('.opcional-extra-item:checked');
+                checks.forEach(chk => {
+                    const extraNom = chk.value;
+                    const extraPrecio = Number(chk.getAttribute('data-precio') || 0);
+                    adicionalesSeleccionados.push(extraNom);
+                    costoAdicionales += extraPrecio;
+                });
+            }
+
+            const precioFinalItem = precioBase + costoAdicionales;
+
+            carrito.push({
+                id,
+                nombre,
+                precio: precioFinalItem,
+                seleccionDinamica,
+                adicionales: adicionalesSeleccionados
+            });
+
+            actualizarVistaCarrito();
+            alert(`✅ ¡${nombre} agregado al carrito!`);
+        };
+
+        function actualizarVistaCarrito() {
+            const container = document.getElementById('carritoItemsContainer');
+            const badge = document.getElementById('carritoBadge');
+            const totalSpan = document.getElementById('carritoTotal');
+
+            badge.textContent = carrito.length;
+
+            if (carrito.length === 0) {
+                container.innerHTML = `<p class="text-xs text-neutral-500 text-center py-8">Tu carrito está vacío.</p>`;
+                totalSpan.textContent = "$0.00";
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = '';
+
+            carrito.forEach((item, index) => {
+                total += item.precio;
+
+                let detallesHtml = '';
+                if (item.seleccionDinamica && item.seleccionDinamica.length > 0) {
+                    detallesHtml += item.seleccionDinamica.map(d => `<span class="block text-[10px] text-neutral-400">• ${d.titulo}: <b>${d.valor}</b></span>`).join('');
+                }
+                if (item.adicionales && item.adicionales.length > 0) {
+                    detallesHtml += `<span class="block text-[10px] text-neutral-400">• Adicionales: <b>${item.adicionales.join(', ')}</b></span>`;
+                }
+
+                const div = document.createElement('div');
+                div.className = "bg-neutral-900 p-4 rounded-2xl border border-neutral-800 flex justify-between items-start space-x-3";
+                div.innerHTML = `
+                    <div class="space-y-1">
+                        <h4 class="text-xs font-bold text-white">${item.nombre}</h4>
+                        ${detallesHtml}
+                        <span class="text-xs font-black text-emerald-400 block pt-1">$${item.precio.toLocaleString('es-AR')}</span>
+                    </div>
+                    <button onclick="eliminarDelCarrito(${index})" class="text-neutral-500 hover:text-red-400 font-bold text-sm cursor-pointer">&times;</button>
+                `;
+                container.appendChild(div);
+            });
+
+            totalSpan.textContent = `$${total.toLocaleString('es-AR')}`;
+        }
+
+        window.eliminarDelCarrito = function(index) {
+            carrito.splice(index, 1);
+            actualizarVistaCarrito();
+        };
+
+        // 4. DESCONTAR STOCK Y ENVIAR A WHATSAPP
+        window.enviarPedidoWhatsApp = async function() {
+            if (carrito.length === 0) {
+                alert("Tu carrito está vacío.");
+                return;
+            }
+
+            const btnEnviar = document.getElementById('btnEnviarPedido');
+            btnEnviar.disabled = true;
+            btnEnviar.innerHTML = "⏳ Actualizando stock y abriendo WhatsApp...";
+
+            let nombreCliente = "Cliente Visitante";
+            if (usuarioActual && usuarioActual.nombre) {
+                nombreCliente = usuarioActual.nombre;
+            } else {
+                const ingreso = prompt("Por favor, ingresá tu nombre y apellido para el pedido:");
+                if (!ingreso || ingreso.trim() === "") {
+                    btnEnviar.disabled = false;
+                    btnEnviar.innerHTML = "<span>📱 Confirmar Pedido y Datos de Pago por WhatsApp</span>";
+                    return;
+                }
+                nombreCliente = ingreso.trim();
+            }
+
+            // Agrupar cantidades por ID de producto para descontar en Supabase
+            const conteoPorId = {};
+            carrito.forEach(item => {
+                conteoPorId[item.id] = (conteoPorId[item.id] || 0) + 1;
+            });
+
+            // Descontar el stock en la base de datos Supabase
+            for (const [idProdStr, cantidadAComprar] of Object.entries(conteoPorId)) {
+                const idProd = Number(idProdStr);
+                const prodOriginal = productosCache.find(p => p.id === idProd);
+                
+                if (prodOriginal) {
+                    const nuevoStock = Math.max(0, (prodOriginal.stock || 0) - cantidadAComprar);
+                    
+                    try {
+                        const { error: updateErr } = await db
+                            .from('productos')
+                            .update({ stock: nuevoStock })
+                            .eq('id', idProd);
+
+                        if (updateErr) {
+                            console.error(`Error al actualizar stock del producto ID ${idProd}:`, updateErr);
+                        }
+                    } catch (ex) {
+                        console.error("Excepción al descontar stock:", ex);
+                    }
+                }
+            }
+
+            // Armar detalle para el mensaje
+            let detalleProductos = "";
+            let totalGeneral = 0;
+
+            carrito.forEach((item, idx) => {
+                totalGeneral += item.precio;
+                detalleProductos += `%0A%0A*${idx + 1}. ${item.nombre}* - $${item.precio}`;
+                if (item.seleccionDinamica) {
+                    item.seleccionDinamica.forEach(d => { detalleProductos += `%0A   - ${d.titulo}: ${d.valor}`; });
+                }
+                if (item.adicionales && item.adicionales.length > 0) {
+                    detalleProductos += `%0A   - Adicionales: ${item.adicionales.join(', ')}`;
+                }
+            });
+
+            const mensaje = `¡Hola! 👋 Quiero realizar el siguiente pedido en el Buffet Fraga Libertad:%0A%0A👤 *Cliente:* ${nombreCliente}${detalleProductos}%0A%0A💰 *TOTAL A PAGAR: $${totalGeneral.toLocaleString('es-AR')}*%0A%0A💳 *DATOS DE PAGO (Mercado Pago):*%0A• *Alias:* ${ALIAS_MERCADO_PAGO}%0A• *Titular:* ${TITULAR_CUENTA}%0A%0A*(Envío el comprobante por este medio una vez realizada la transferencia)*`;
+
+            // Limpiar carrito y recargar carta con el nuevo stock
+            carrito = [];
+            actualizarVistaCarrito();
+            await cargarCarta();
+
+            btnEnviar.disabled = false;
+            btnEnviar.innerHTML = "<span>📱 Confirmar Pedido y Datos de Pago por WhatsApp</span>";
+
+            window.open(`https://wa.me/${NUMERO_WHATSAPP_BUFFET}?text=${mensaje}`, '_blank');
+        };
+
+        cargarCarta();
+    </script>
+</body>
+</html>

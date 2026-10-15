@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso y Registro - Buffet Fragata Libertad</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white min-h-screen flex items-center justify-center p-6 font-sans">
+
+    <div class="bg-neutral-950 border border-neutral-800 rounded-3xl p-8 max-w-md w-full shadow-2xl space-y-6">
+        
+        <!-- LOGO Y TÍTULO PRINCIPAL CON TRUCO SECRETO DE TRIPLE CLIC -->
+        <div class="text-center space-y-3">
+            <div class="flex justify-center">
+                <div class="bg-white p-1 rounded-2xl shadow-lg shadow-white/10 flex items-center justify-center overflow-hidden w-16 h-16">
+                    <img src="./logo.jpeg" alt="Logo Buffet Libertad" class="w-full h-full object-contain">
+                </div>
+            </div>
+            
+            <div class="space-y-1">
+                <!-- 🕵️‍♂️ TRUCO SECRETO: Hacer TRIPLE CLIC RÁPIDO en este título activará el modo Administrador Oculto -->
+                <h1 id="tituloPrincipal" class="text-xl font-black tracking-wider cursor-pointer select-none hover:text-neutral-200 transition" title="Haz triple clic aquí si conoces el secreto...">
+                    BUFFET FRAGATA LIBERTAD
+                </h1>
+                <p id="subtituloModo" class="text-xs text-neutral-400">Iniciá sesión o creá tu cuenta de usuario</p>
+            </div>
+        </div>
+
+        <!-- PESTAÑAS DE NAVEGACIÓN (INICIAR SESIÓN / REGISTRARSE) -->
+        <div class="flex bg-neutral-900 p-1 rounded-2xl border border-neutral-800">
+            <button type="button" id="tabLogin" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-white text-black transition shadow-md cursor-pointer">
+                Iniciar Sesión
+            </button>
+            <button type="button" id="tabRegister" class="flex-1 py-2.5 text-xs font-bold rounded-xl text-neutral-400 hover:text-white transition cursor-pointer">
+                Registrarse
+            </button>
+        </div>
+
+        <!-- ================= FORMULARIO DE INICIO DE SESIÓN ================= -->
+        <form id="formLogin" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-neutral-300 mb-1.5">Correo Electrónico</label>
+                <input type="email" id="loginEmail" required class="w-full px-4 py-3 bg-black rounded-xl text-xs border border-neutral-800 text-white focus:outline-none focus:border-white transition" placeholder="tu_correo@gmail.com">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-neutral-300 mb-1.5">Contraseña</label>
+                <input type="password" id="loginPassword" required class="w-full px-4 py-3 bg-black rounded-xl text-xs border border-neutral-800 text-white focus:outline-none focus:border-white transition" placeholder="••••••••">
+            </div>
+            <button type="submit" class="w-full bg-white hover:bg-neutral-200 text-black py-3.5 rounded-xl text-xs font-black tracking-wider transition shadow-lg cursor-pointer">
+                Ingresar a la pagina web del buffet
+            </button>
+        </form>
+
+        <!-- ================= FORMULARIO DE REGISTRO SEGURO ================= -->
+        <form id="formRegister" class="space-y-4 hidden">
+            <div>
+                <label class="block text-xs font-semibold text-neutral-300 mb-1.5">Nombre Completo</label>
+                <input type="text" id="regNombre" required class="w-full px-4 py-3 bg-black rounded-xl text-xs border border-neutral-800 text-white focus:outline-none focus:border-white transition" placeholder="Ej: Francisco Garcia">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-neutral-300 mb-1.5">Correo Electrónico (Verificación Real)</label>
+                <input type="email" id="regEmail" required class="w-full px-4 py-3 bg-black rounded-xl text-xs border border-neutral-800 text-white focus:outline-none focus:border-white transition" placeholder="correo@dominio.com">
+                <p id="emailStatus" class="text-[10px] mt-1 text-neutral-500">Ingresá un correo electrónico válido.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-neutral-300 mb-1.5">Contraseña Segura (Requisito Estricto)</label>
+                <input type="password" id="regPassword" required class="w-full px-4 py-3 bg-black rounded-xl text-xs border border-neutral-800 text-white focus:outline-none focus:border-white transition" placeholder="Mín. 8 caracteres, Mayús, Números y Símbolos">
+                
+                <!-- Indicador de seguridad tipo Google -->
+                <div class="mt-2 space-y-1">
+                    <div class="w-full bg-neutral-900 h-1.5 rounded-full overflow-hidden">
+                        <div id="barraSeguridad" class="h-full w-0 bg-red-500 transition-all duration-300"></div>
+                    </div>
+                    <p id="textoSeguridad" class="text-[10px] text-neutral-500">La contraseña debe ser segura.</p>
+                </div>
+            </div>
+
+            <!-- 🔒 CAMPO OCULTO DE ADMINISTRADOR SECRETO -->
+            <div id="seccionAdminOculta" class="hidden bg-red-950/30 border border-red-500/40 p-3 rounded-xl space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-red-400">🚨 MODO ADMINISTRADOR SECRETO</span>
+                    <button type="button" id="btnCerrarAdminOculto" class="text-neutral-400 hover:text-white text-xs font-bold cursor-pointer">&times;</button>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-semibold text-neutral-300 mb-1">Clave Maestra de Administrador</label>
+                    <input type="password" id="regAdminKey" class="w-full px-3 py-2 bg-black rounded-lg text-xs border border-neutral-800 text-white" placeholder="Introduce la llave secreta...">
+                </div>
+            </div>
+
+            <button type="submit" id="btnRegistrar" class="w-full bg-white hover:bg-neutral-200 text-black py-3.5 rounded-xl text-xs font-black tracking-wider transition shadow-lg cursor-pointer">
+                Crear Cuenta de Usuario
+            </button>
+        </form>
+
+    </div>
+
+    <!-- Script de Autenticación y Lógica -->
+    <script type="module">
+        import { db } from './supabase.js';
+
+        let esModoAdminSecreto = false;
+        let contadorClicksTitulo = 0;
+        let timerClicks = null;
+
+        // ==========================================
+        // 1. CAMBIO DE PESTAÑAS (INICIAR SESIÓN / REGISTRARSE)
+        // ==========================================
+        const btnTabLogin = document.getElementById('tabLogin');
+        const btnTabRegister = document.getElementById('tabRegister');
+        const boxLogin = document.getElementById('formLogin');
+        const boxRegister = document.getElementById('formRegister');
+
+        function cambiarPestana(tipo) {
+            if (tipo === 'login') {
+                btnTabLogin.className = "flex-1 py-2.5 text-xs font-bold rounded-xl bg-white text-black transition shadow-md cursor-pointer";
+                btnTabRegister.className = "flex-1 py-2.5 text-xs font-bold rounded-xl text-neutral-400 hover:text-white transition cursor-pointer";
+                boxLogin.classList.remove('hidden');
+                boxRegister.classList.add('hidden');
+            } else {
+                btnTabRegister.className = "flex-1 py-2.5 text-xs font-bold rounded-xl bg-white text-black transition shadow-md cursor-pointer";
+                btnTabLogin.className = "flex-1 py-2.5 text-xs font-bold rounded-xl text-neutral-400 hover:text-white transition cursor-pointer";
+                boxRegister.classList.remove('hidden');
+                boxLogin.classList.add('hidden');
+            }
+        }
+
+        btnTabLogin.addEventListener('click', () => cambiarPestana('login'));
+        btnTabRegister.addEventListener('click', () => cambiarPestana('register'));
+
+        // ==========================================
+        // 2. TRUCO SECRETO PARA ACTIVAR MODO ADMIN (TRIPLE CLIC)
+        // ==========================================
+        document.getElementById('tituloPrincipal').addEventListener('click', () => {
+            contadorClicksTitulo++;
+            clearTimeout(timerClicks);
+
+            timerClicks = setTimeout(() => {
+                contadorClicksTitulo = 0;
+            }, 600);
+
+            if (contadorClicksTitulo >= 3) {
+                contadorClicksTitulo = 0;
+                esModoAdminSecreto = true;
+                
+                cambiarPestana('register');
+                
+                document.getElementById('seccionAdminOculta').classList.remove('hidden');
+                document.getElementById('subtituloModo').textContent = "🛡️ Modo Creación de Administrador Desbloqueado";
+                document.getElementById('subtituloModo').className = "text-xs text-red-400 font-bold animate-pulse";
+                alert("🔓 ¡Atajo secreto descubierto! Se ha desbloqueado el panel de creación de Administrador.");
+            }
+        });
+
+        document.getElementById('btnCerrarAdminOculto').addEventListener('click', () => {
+            esModoAdminSecreto = false;
+            document.getElementById('seccionAdminOculta').classList.add('hidden');
+            document.getElementById('subtituloModo').textContent = "Iniciá sesión o creá tu cuenta de usuario";
+            document.getElementById('subtituloModo').className = "text-xs text-neutral-400";
+        });
+
+        // ==========================================
+        // 3. VALIDACIÓN EN TIEMPO REAL DEL CORREO
+        // ==========================================
+        const inputEmailReg = document.getElementById('regEmail');
+        const emailStatus = document.getElementById('emailStatus');
+
+        inputEmailReg.addEventListener('blur', () => {
+            const email = inputEmailReg.value.trim();
+            const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            
+            if (!email) {
+                emailStatus.textContent = "El correo es obligatorio.";
+                emailStatus.className = "text-[10px] mt-1 text-neutral-500";
+                return;
+            }
+
+            if (!regexEmail.test(email)) {
+                emailStatus.textContent = "❌ Formato de correo inválido (Falta '@' o dominio).";
+                emailStatus.className = "text-[10px] mt-1 text-red-400 font-semibold";
+                return;
+            }
+
+            const dominio = email.split('@')[1].toLowerCase();
+            const dominiosBloqueados = ['test.com', 'abc.com', 'fakemail.com', 'correo.com'];
+            if (dominiosBloqueados.includes(dominio)) {
+                emailStatus.textContent = "⚠️ Por favor ingresá un correo electrónico real y activo.";
+                emailStatus.className = "text-[10px] mt-1 text-amber-400 font-semibold";
+                return;
+            }
+
+            emailStatus.textContent = "✅ Correo válido y verificado.";
+            emailStatus.className = "text-[10px] mt-1 text-emerald-400 font-semibold";
+        });
+
+        // ==========================================
+        // 4. VALIDACIÓN DE CONTRASEÑA SEGURA (ESTILO GOOGLE)
+        // ==========================================
+        const inputPass = document.getElementById('regPassword');
+        const barraSeguridad = document.getElementById('barraSeguridad');
+        const textoSeguridad = document.getElementById('textoSeguridad');
+
+        inputPass.addEventListener('input', () => {
+            const val = inputPass.value;
+            let puntaje = 0;
+
+            if (val.length >= 8) puntaje++;
+            if (/[A-Z]/.test(val)) puntaje++;
+            if (/[0-9]/.test(val)) puntaje++;
+            if (/[^A-Za-z0-9]/.test(val)) puntaje++;
+
+            if (val.length === 0) {
+                barraSeguridad.style.width = '0%';
+                textoSeguridad.textContent = "La contraseña debe ser segura.";
+                textoSeguridad.className = "text-[10px] text-neutral-500";
+            } else if (puntaje <= 2) {
+                barraSeguridad.style.width = '35%';
+                barraSeguridad.className = "h-full bg-red-500 transition-all duration-300";
+                textoSeguridad.textContent = "⚠️ Débil: Usá más de 8 caracteres, mayúsculas, números y símbolos.";
+                textoSeguridad.className = "text-[10px] text-red-400 font-semibold";
+            } else if (puntaje === 3) {
+                barraSeguridad.style.width = '75%';
+                barraSeguridad.className = "h-full bg-amber-500 transition-all duration-300";
+                textoSeguridad.textContent = "👍 Buena contraseña.";
+                textoSeguridad.className = "text-[10px] text-amber-400 font-semibold";
+            } else {
+                barraSeguridad.style.width = '100%';
+                barraSeguridad.className = "h-full bg-emerald-500 transition-all duration-300";
+                textoSeguridad.textContent = "🔒 ¡Contraseña muy segura!";
+                textoSeguridad.className = "text-[10px] text-emerald-400 font-semibold";
+            }
+        });
+
+        // ==========================================
+        // 5. REGISTRAR USUARIO / ADMIN EN SUPABASE
+        // ==========================================
+        document.getElementById('formRegister').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nombre = document.getElementById('regNombre').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+                alert("⚠️ La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.");
+                return;
+            }
+
+            let rolAsignado = 'usuario';
+
+            if (esModoAdminSecreto) {
+                const claveAdminInput = document.getElementById('regAdminKey').value.trim();
+                const LLAVE_MAESTRA_SECRETA = "buffetfragatallave"; 
+
+                if (claveAdminInput === LLAVE_MAESTRA_SECRETA) {
+                    rolAsignado = 'admin';
+                    alert("👑 Llave maestra correcta. Se creará la cuenta con perfil ADMINISTRADOR.");
+                } else {
+                    alert("⛔ Clave maestra incorrecta. Se creará como usuario común.");
+                }
+            }
+
+            try {
+                const { data: usuarioExistente } = await db.from('usuarios').select('*').eq('email', email).maybeSingle();
+                
+                if (usuarioExistente) {
+                    alert("❌ Este correo electrónico ya está registrado.");
+                    return;
+                }
+
+                const { error } = await db.from('usuarios').insert([{
+                    nombre,
+                    email,
+                    password,
+                    rol: rolAsignado
+                }]);
+
+                if (error) {
+                    alert("❌ Error al registrar cuenta: " + error.message);
+                } else {
+                    alert(`🎉 ¡Cuenta creada correctamente como [${rolAsignado.toUpperCase()}]! Ya podés iniciar sesión.`);
+                    document.getElementById('formRegister').reset();
+                    
+                    esModoAdminSecreto = false;
+                    document.getElementById('seccionAdminOculta').classList.add('hidden');
+                    document.getElementById('subtituloModo').textContent = "Iniciá sesión o creá tu cuenta de usuario";
+                    document.getElementById('subtituloModo').className = "text-xs text-neutral-400";
+
+                    cambiarPestana('login');
+                }
+            } catch (err) {
+                console.error("Excepción en registro:", err);
+                alert("❌ Error de conexión con la base de datos.");
+            }
+        });
+
+        // ==========================================
+        // 6. INICIAR SESIÓN EN SUPABASE
+        // ==========================================
+        document.getElementById('formLogin').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const { data: usuario, error } = await db
+                    .from('usuarios')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', password)
+                    .maybeSingle();
+
+                if (error || !usuario) {
+                    alert("⛔ Credenciales incorrectas. Verificá correo y contraseña.");
+                    return;
+                }
+
+                localStorage.setItem("usuarioLogueado", JSON.stringify({
+                    id: usuario.id,
+                    nombre: usuario.nombre,
+                    email: usuario.email,
+                    rol: usuario.rol
+                }));
+
+                alert(`¡Bienvenido de nuevo, ${usuario.nombre}!`);
+
+                if (usuario.rol === 'admin') {
+                    window.location.replace("admin.html");
+                } else {
+                    window.location.replace("index.html");
+                }
+
+            } catch (err) {
+                console.error("Error en login:", err);
+                alert("❌ Error de servidor.");
+            }
+        });
+    </script>
+</body>
+</html>
